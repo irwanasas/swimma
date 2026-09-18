@@ -22,6 +22,7 @@ create function search_similar_children(
   from children c
   join profiles p on p.id = c.parent_id
   where c.is_active
+    and c.tenant_id = current_tenant_id()
     and (
       similarity(c.full_name, p_full_name) > 0.3
       or (p_date_of_birth is not null and c.date_of_birth = p_date_of_birth)

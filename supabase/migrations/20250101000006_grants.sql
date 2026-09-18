@@ -1,4 +1,5 @@
 grant select, insert, update, delete on
+  tenants,
   profiles,
   locations,
   class_types,

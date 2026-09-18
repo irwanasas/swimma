@@ -15,13 +15,24 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json({ error: GENERIC_ERROR }, { status: 400 });
   }
-  const { email, password } = parsed.data;
+  const { tenantSlug, email, password } = parsed.data;
 
   const supabase = createAdminSupabaseClient();
+
+  const { data: tenant } = await supabase
+    .from("tenants")
+    .select("id, is_active")
+    .eq("slug", tenantSlug)
+    .maybeSingle();
+
+  if (!tenant || !tenant.is_active) {
+    return NextResponse.json({ error: GENERIC_ERROR }, { status: 401 });
+  }
 
   const { data: profile } = await supabase
     .from("profiles")
     .select("id, role, email, full_name, is_active")
+    .eq("tenant_id", tenant.id)
     .eq("email", email)
     .maybeSingle();
 
@@ -76,6 +87,7 @@ export async function POST(request: Request) {
     email: profile.email,
     fullName: profile.full_name,
     role: profile.role,
+    tenantId: tenant.id,
   });
 
   return NextResponse.json({ redirectTo: roleHome(profile.role) });

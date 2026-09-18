@@ -5,6 +5,7 @@ export interface SessionClaims {
   sub: string;
   role: "authenticated";
   app_role: AppRole;
+  tenant_id: string;
   email: string;
   full_name: string;
 }

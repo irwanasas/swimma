@@ -39,13 +39,14 @@ export interface ParentMatch {
 }
 
 export async function searchParentByContact(contact: string): Promise<ParentMatch[]> {
-  await requireActionRole("admin");
+  const session = await requireActionRole("admin");
   const trimmed = contact.trim();
   if (!trimmed) return [];
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("profiles")
     .select("id, full_name, email, phone")
+    .eq("tenant_id", session.tenant_id)
     .eq("role", "parent")
     .or(`email.ilike.%${trimmed}%,phone.ilike.%${trimmed}%,full_name.ilike.%${trimmed}%`)
     .limit(5);
@@ -56,7 +57,7 @@ export async function createChild(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireActionRole("admin");
+  const session = await requireActionRole("admin");
 
   const raw = {
     parentMode: formData.get("parentMode"),
@@ -85,6 +86,7 @@ export async function createChild(
     const { data: existing } = await supabase
       .from("profiles")
       .select("id")
+      .eq("tenant_id", session.tenant_id)
       .eq("email", input.parentEmail)
       .maybeSingle();
 
@@ -98,6 +100,7 @@ export async function createChild(
     const { data: parent, error: parentError } = await supabase
       .from("profiles")
       .insert({
+        tenant_id: session.tenant_id,
         role: "parent",
         full_name: input.parentFullName,
         email: input.parentEmail,
@@ -129,6 +132,7 @@ export async function createChild(
   }
 
   const { error: childError } = await supabase.from("children").insert({
+    tenant_id: session.tenant_id,
     parent_id: parentId,
     full_name: input.childFullName,
     date_of_birth: input.dateOfBirth,

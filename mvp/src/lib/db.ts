@@ -16,7 +16,7 @@ import type {
 } from "@/types/db";
 import { seedDatabase } from "./seed";
 
-const STORAGE_KEY = "bugarswim_mvp_db_v1";
+const STORAGE_KEY = "swimma_mvp_db_v1";
 
 export function genId(): string {
   return crypto.randomUUID();

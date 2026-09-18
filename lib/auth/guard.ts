@@ -29,6 +29,7 @@ export async function requireRole(role: AppRole) {
     id: session.sub,
     email: session.email,
     role: session.app_role,
+    tenantId: session.tenant_id,
     fullName: profile.full_name as string,
   };
 }

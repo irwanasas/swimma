@@ -45,6 +45,7 @@ export async function changePassword(
     email: session.email,
     fullName: session.full_name,
     role: session.app_role,
+    tenantId: session.tenant_id,
   });
 
   redirect(roleHome(session.app_role));

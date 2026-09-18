@@ -2,7 +2,7 @@ import { cookies } from "next/headers";
 import { signSession, verifySession, type SessionClaims } from "./jwt";
 import type { AppRole } from "./roles";
 
-const COOKIE_NAME = "bugarswim_session";
+const COOKIE_NAME = "app_session";
 const MAX_AGE_SECONDS = 60 * 60 * 24 * 7;
 
 export async function createSession(user: {
@@ -10,10 +10,12 @@ export async function createSession(user: {
   email: string;
   fullName: string;
   role: AppRole;
+  tenantId: string;
 }) {
   const token = await signSession({
     sub: user.id,
     app_role: user.role,
+    tenant_id: user.tenantId,
     email: user.email,
     full_name: user.fullName,
   });

@@ -1,16 +1,34 @@
 import { getLocations, getClassTypes } from "@/lib/data/lookups";
+import { getCurrentTenant } from "@/lib/data/tenant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { LocationForm } from "@/components/settings/location-form";
 import { ClassTypeForm } from "@/components/settings/class-type-form";
+import { TenantBrandingForm } from "@/components/settings/tenant-branding-form";
 
 export default async function SettingsPage() {
-  const [locations, classTypes] = await Promise.all([getLocations(), getClassTypes()]);
+  const [locations, classTypes, tenant] = await Promise.all([
+    getLocations(),
+    getClassTypes(),
+    getCurrentTenant(),
+  ]);
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">Pengaturan</h1>
       <div className="grid gap-6 md:grid-cols-2">
+        <Card>
+          <CardHeader>
+            <CardTitle>Identitas Klub</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <TenantBrandingForm
+              name={tenant?.name ?? ""}
+              logoUrl={tenant?.logoUrl ?? null}
+              primaryColor={tenant?.primaryColor ?? null}
+            />
+          </CardContent>
+        </Card>
         <Card>
           <CardHeader>
             <CardTitle>Lokasi Kolam</CardTitle>

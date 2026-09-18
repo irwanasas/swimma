@@ -1,5 +1,7 @@
 import { requireRole } from "@/lib/auth/guard";
+import { getCurrentTenant } from "@/lib/data/tenant";
 import { AppShell, type NavItem } from "@/components/shared/app-shell";
+import { APP_NAME } from "@/lib/config";
 
 const NAV_ITEMS: NavItem[] = [
   { href: "/admin", label: "Dasbor" },
@@ -18,8 +20,14 @@ const NAV_ITEMS: NavItem[] = [
 
 export default async function AdminLayout({ children }: { children: React.ReactNode }) {
   const session = await requireRole("admin");
+  const tenant = await getCurrentTenant();
   return (
-    <AppShell navItems={NAV_ITEMS} fullName={session.fullName} roleLabel="Admin">
+    <AppShell
+      navItems={NAV_ITEMS}
+      fullName={session.fullName}
+      roleLabel="Admin"
+      clubName={tenant?.name ?? APP_NAME}
+    >
       {children}
     </AppShell>
   );

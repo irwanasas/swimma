@@ -12,7 +12,7 @@ export async function createCoach(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireActionRole("admin");
+  const session = await requireActionRole("admin");
 
   const parsed = coachSchema.safeParse({
     fullName: formData.get("fullName"),
@@ -28,6 +28,7 @@ export async function createCoach(
   const { data: existing } = await supabase
     .from("profiles")
     .select("id")
+    .eq("tenant_id", session.tenant_id)
     .eq("email", input.email)
     .maybeSingle();
 
@@ -38,6 +39,7 @@ export async function createCoach(
   const { data: coach, error } = await supabase
     .from("profiles")
     .insert({
+      tenant_id: session.tenant_id,
       role: "coach",
       full_name: input.fullName,
       email: input.email,

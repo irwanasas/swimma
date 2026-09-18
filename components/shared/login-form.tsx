@@ -22,6 +22,7 @@ export function LoginForm() {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
+        tenantSlug: formData.get("tenantSlug"),
         email: formData.get("email"),
         password: formData.get("password"),
       }),
@@ -45,6 +46,10 @@ export function LoginForm() {
           <AlertDescription>{error}</AlertDescription>
         </Alert>
       ) : null}
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor="tenantSlug">Kode Klub</Label>
+        <Input id="tenantSlug" name="tenantSlug" required autoComplete="organization" />
+      </div>
       <div className="flex flex-col gap-1.5">
         <Label htmlFor="email">Email</Label>
         <Input id="email" name="email" type="email" required autoComplete="email" />

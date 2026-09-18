@@ -33,7 +33,7 @@ export default function LoginPage() {
     <div className="flex min-h-screen flex-1 items-center justify-center bg-secondary p-4">
       <Card className="w-full max-w-sm">
         <CardHeader>
-          <CardTitle>Bugarswim (Demo)</CardTitle>
+          <CardTitle>Swimma (Demo)</CardTitle>
           <CardDescription>
             Demo lokal berbasis localStorage &mdash; bukan aplikasi produksi.
           </CardDescription>

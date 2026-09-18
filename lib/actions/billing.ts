@@ -82,7 +82,7 @@ export async function generateInvoices(
   _prevState: ActionState,
   formData: FormData
 ): Promise<ActionState> {
-  await requireActionRole("admin");
+  const session = await requireActionRole("admin");
   const parsed = generateInvoicesSchema.safeParse({
     periodStart: formData.get("periodStart"),
     periodEnd: formData.get("periodEnd"),
@@ -97,6 +97,7 @@ export async function generateInvoices(
     p_period_start: parsed.data.periodStart,
     p_period_end: parsed.data.periodEnd,
     p_due_date: parsed.data.dueDate,
+    p_tenant_id: session.tenant_id,
   });
 
   if (error) return { ok: false, error: "Gagal membuat tagihan" };

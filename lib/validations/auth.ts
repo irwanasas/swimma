@@ -1,6 +1,11 @@
 import { z } from "zod";
 
 export const loginSchema = z.object({
+  tenantSlug: z
+    .string()
+    .trim()
+    .min(1, "Kode klub wajib diisi")
+    .toLowerCase(),
   email: z.string().email("Email tidak valid"),
   password: z.string().min(1, "Kata sandi wajib diisi"),
 });

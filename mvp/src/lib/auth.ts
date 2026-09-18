@@ -1,7 +1,7 @@
 import type { AppRole } from "@/types/db";
 import { findProfileByEmail, getCredential } from "./db";
 
-const SESSION_KEY = "bugarswim_mvp_session";
+const SESSION_KEY = "swimma_mvp_session";
 
 export interface Session {
   userId: string;

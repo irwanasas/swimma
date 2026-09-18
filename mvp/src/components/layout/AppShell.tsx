@@ -22,7 +22,7 @@ export function AppShell({ navItems, roleLabel }: { navItems: NavItem[]; roleLab
       <header className="flex items-center justify-between border-b border-border bg-card px-4 py-3 sm:px-6">
         <div className="flex items-center gap-2">
           <span className="font-heading text-base font-semibold tracking-tight text-primary">
-            Bugarswim <span className="text-muted-foreground">(Demo)</span>
+            Swimma <span className="text-muted-foreground">(Demo)</span>
           </span>
           <span className="rounded-full bg-secondary px-2.5 py-0.5 text-xs font-medium text-secondary-foreground">
             {roleLabel}

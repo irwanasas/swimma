@@ -1,6 +1,6 @@
-# Bugarswim MVP (static demo)
+# Swimma MVP (static demo)
 
-A fully client-side demo of the Bugarswim swimming-club app, built for
+A fully client-side demo of the Swimma swimming-club app, built for
 GitHub Pages where no server can run. Every "database" is a single
 localStorage blob in your browser — there is no backend, no real
 authentication, and no data shared between devices or people.

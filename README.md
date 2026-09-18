@@ -1,23 +1,40 @@
-# Bugarswim
+# Swimma
 
-Swimming club management app: membership, scheduling, attendance, billing,
-cash ledger, coach payroll, and promo announcements, for admin/coach/parent
-roles.
-
-Now Live at https://n-1repo.github.io/bugarswim/
+Multi-tenant swimming club management platform: membership, scheduling,
+attendance, billing, cash ledger, coach payroll, and promo announcements, for
+admin/coach/parent roles. One deployment can serve many independent clubs
+(tenants), each with its own isolated data and branding.
 
 Stack: Next.js (App Router) + TypeScript, Supabase Postgres with Row Level
 Security, Tailwind CSS, Vercel deployment.
 
+## Multi-tenancy model
+
+Every club is a row in `tenants`. All club-owned data (profiles, locations,
+class types, children, classes, bookings, packages, subscriptions, invoices,
+cash ledger, payroll, promo) carries a `tenant_id` and is isolated by
+Postgres Row Level Security — the database, not the frontend, is the
+isolation boundary. `current_tenant_id()` reads the tenant id embedded in the
+caller's session JWT, and every RLS policy filters by it; cross-tenant
+foreign key references (e.g. a booking's child and class must belong to the
+same tenant) are additionally rejected by trigger checks at write time.
+
+A profile (login identity) belongs to exactly one tenant with one role
+(admin/coach/parent). The same email address can hold separate accounts in
+different clubs. A club's own name, logo, and primary color live in
+`tenants` and are edited from Admin -> Pengaturan; they are not environment
+variables.
+
 ## Auth model
 
 Authentication is **custom** (bcrypt password hashes in our own
-`auth_credentials` table), not Supabase Auth. On login, the server verifies
-the password and mints its own JWT signed with the Supabase project's JWT
-secret, carrying `sub` (user id) and `app_role` (admin/coach/parent). That
-JWT is stored in an httpOnly cookie and attached as the `Authorization`
-header on every Supabase request, so Postgres RLS (`auth.uid()`,
-`auth.jwt()`) enforces access exactly as it would with Supabase Auth.
+`auth_credentials` table), not Supabase Auth. On login (email + password +
+club code), the server verifies the password and mints its own JWT signed
+with the Supabase project's JWT secret, carrying `sub` (profile id),
+`tenant_id`, and `app_role` (admin/coach/parent). That JWT is stored in an
+httpOnly cookie and attached as the `Authorization` header on every Supabase
+request, so Postgres RLS (`auth.uid()`, `auth.jwt()`) enforces both role and
+tenant scoping exactly as it would with Supabase Auth.
 
 **Before running migrations against a real project**, check Project
 Settings → API → JWT Keys. This setup requires the legacy shared **HS256
@@ -30,7 +47,10 @@ The service-role key is used only in a few narrow, reviewed places (never in
 client-reachable code): login lookup, creating a parent/coach account
 together with its credentials row, the monthly invoice-generation cron and
 its "generate now" admin button. Every other read/write goes through the
-per-request JWT-bound client, so RLS is the real security boundary.
+per-request JWT-bound client, so RLS is the real security boundary. Every
+service-role write to a tenant-scoped table passes `tenant_id` explicitly
+(the service-role client has no session JWT for `current_tenant_id()` to
+read).
 
 Deactivating an account (`profiles.is_active = false`) cuts off all DB
 access immediately, even though its JWT technically hasn't expired — this is
@@ -54,42 +74,34 @@ functions, not just in individual policies.
      secret; see the note above).
    - `CRON_SECRET` — any random string; Vercel Cron sends it automatically
      as a bearer token once set as an env var on the project.
-   - `NEXT_PUBLIC_CLUB_NAME` — optional; the name shown on the login page,
-     sidebar header, and browser tab. Defaults to "Bugarswim" if unset.
-5. Seed the first admin account:
+   - `NEXT_PUBLIC_APP_NAME` — optional; the platform name shown before a
+     club is selected (login screen, browser tab). Defaults to "Swimma".
+5. Onboard the first club and its admin account:
    ```bash
-   SEED_ADMIN_EMAIL=admin@example.com SEED_ADMIN_PASSWORD=ChangeMe123 npm run seed:admin
+   SEED_TENANT_SLUG=my-club SEED_TENANT_NAME="My Club" \
+   SEED_ADMIN_EMAIL=admin@example.com SEED_ADMIN_PASSWORD=ChangeMe123 \
+   npm run seed:admin
    ```
-6. `npm run dev` and log in at `/login`.
+   Run it again with a different `SEED_TENANT_SLUG` to onboard another club
+   onto the same deployment/database.
+6. `npm run dev` and log in at `/login` with the club code, email, and
+   password.
 
 ## Deploying to Vercel
 
 Create a Vercel project linked to this repo, set the same environment
 variables there, and deploy. `vercel.json` already schedules the monthly
-invoice-generation cron (`/api/cron/generate-invoices`, 1st of each month).
+invoice-generation cron (`/api/cron/generate-invoices`, 1st of each month),
+which generates invoices for every active tenant in one run.
 
-## Reusing this codebase for a new client
+## Onboarding a new club
 
-This app is currently **single-tenant**: one deployment and one Supabase
-project serves one club's data, with no `club_id`/organization concept
-anywhere in the schema. To onboard a new client today, deploy a separate
-instance from this same codebase rather than adding them to an existing
-one:
-
-1. Create a new Supabase project for the client and repeat the **Local
-   setup** steps above against it (migrations, env vars, seed admin).
-2. Set `NEXT_PUBLIC_CLUB_NAME` to the new client's name.
-3. Re-theme `app/globals.css` — the color tokens in `:root` (`--primary`,
-   `--sidebar`, etc.) and the fonts in `app/layout.tsx` are the club's
-   brand; edit them for the new client before deploying.
-4. Deploy to a new Vercel project pointed at the new Supabase project.
-
-Each client gets their own isolated database and deployment from the same
-source — no cross-client data exposure risk, but also no shared upgrades:
-a fix or feature has to be redeployed to each client's instance
-separately. If/when there's enough demand to justify it, the schema would
-need a real multi-tenant pass (`club_id` on every table, RLS scoped by
-club) to run many clients off one shared deployment instead.
+Because isolation is enforced at the database level (RLS + `tenant_id`),
+new clubs are onboarded onto the **same** deployment and Supabase project
+by running `npm run seed:admin` again with a new `SEED_TENANT_SLUG`/
+`SEED_TENANT_NAME` — no new Supabase project or Vercel deployment needed.
+The new admin then sets their own club name/logo/color from Admin ->
+Pengaturan.
 
 ## Notes / out of scope
 

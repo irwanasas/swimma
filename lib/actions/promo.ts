@@ -28,7 +28,7 @@ export async function createPromo(
   const file = formData.get("image");
   if (file instanceof File && file.size > 0) {
     const ext = file.name.split(".").pop() ?? "jpg";
-    const path = `${crypto.randomUUID()}.${ext}`;
+    const path = `${session.tenant_id}/${crypto.randomUUID()}.${ext}`;
     const { error: uploadError } = await supabase.storage
       .from("promo")
       .upload(path, file, { contentType: file.type });

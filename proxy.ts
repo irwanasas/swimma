@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { jwtVerify } from "jose";
 
-const COOKIE_NAME = "bugarswim_session";
+const COOKIE_NAME = "app_session";
 const ROLE_HOMES: Record<string, string> = {
   admin: "/admin",
   coach: "/coach",
