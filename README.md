@@ -113,3 +113,28 @@ Pengaturan.
 - No self-registration: admin creates parent and coach accounts (with a
   temporary password that must be changed on first login) since letting
   parents register themselves would undermine the duplicate-child check.
+
+## Changelog
+
+### 2026-09-22
+
+- Added `frontend-design`, `bencium-innovative-ux-designer`, `design-audit`
+  skills under `.claude/skills/`.
+- Admin dashboard (`/admin`) now shows live KPIs, overdue/expiring alerts,
+  today's classes, recent cash entries, and quick actions (was a static
+  welcome card).
+- Search/filter added to the members, coaches, schedule, subscriptions, and
+  invoices list pages.
+- New session-pack billing mode (N sessions / X weeks) alongside the
+  existing recurring `billing_cycle` packages — additive migration
+  `20250101000009_session_packages.sql`, a `subscription_usage` view, and a
+  fix to `generate_invoices_for_period` so it never double-bills
+  session-pack subscribers.
+- Light/dark theme (`next-themes`).
+- Add/manage flows switched from dedicated pages and always-visible inline
+  forms to dialogs (native `<dialog>`, Next.js intercepting routes for
+  members/coaches/schedule).
+- Public marketing landing page at `/` (hero, features, how-it-works,
+  multi-tenant section, dashboard preview, CTA, footer); an authenticated
+  session still redirects straight to its role home, and `/login` is
+  unchanged.
