@@ -12,23 +12,48 @@ export async function createPackage(
   formData: FormData
 ): Promise<ActionState> {
   await requireActionRole("admin");
-  const parsed = packageSchema.safeParse({
-    name: formData.get("name"),
-    price: formData.get("price"),
-    billingCycle: formData.get("billingCycle"),
-    description: formData.get("description") || undefined,
-  });
+  const pricingMode = formData.get("pricingMode");
+  const parsed = packageSchema.safeParse(
+    pricingMode === "session_pack"
+      ? {
+          pricingMode: "session_pack",
+          name: formData.get("name"),
+          price: formData.get("price"),
+          sessionsIncluded: formData.get("sessionsIncluded"),
+          validityWeeks: formData.get("validityWeeks"),
+          description: formData.get("description") || undefined,
+        }
+      : {
+          pricingMode: "cycle",
+          name: formData.get("name"),
+          price: formData.get("price"),
+          billingCycle: formData.get("billingCycle"),
+          description: formData.get("description") || undefined,
+        }
+  );
   if (!parsed.success) {
     return { ok: false, error: parsed.error.issues[0]?.message ?? "Data tidak valid" };
   }
 
   const supabase = await createServerSupabaseClient();
-  const { error } = await supabase.from("membership_packages").insert({
-    name: parsed.data.name,
-    price: parsed.data.price,
-    billing_cycle: parsed.data.billingCycle,
-    description: parsed.data.description ?? null,
-  });
+  const { error } = await supabase.from("membership_packages").insert(
+    parsed.data.pricingMode === "session_pack"
+      ? {
+          name: parsed.data.name,
+          price: parsed.data.price,
+          pricing_mode: "session_pack",
+          sessions_included: parsed.data.sessionsIncluded,
+          validity_weeks: parsed.data.validityWeeks,
+          description: parsed.data.description ?? null,
+        }
+      : {
+          name: parsed.data.name,
+          price: parsed.data.price,
+          pricing_mode: "cycle",
+          billing_cycle: parsed.data.billingCycle,
+          description: parsed.data.description ?? null,
+        }
+  );
   if (error) return { ok: false, error: "Gagal menyimpan paket" };
 
   revalidatePath("/admin/billing/packages");

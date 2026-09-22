@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { TriggerDialog } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -31,9 +32,15 @@ export default async function CashLedgerPage() {
     <div className="flex flex-col gap-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl font-semibold">Buku Kas</h1>
-        <Badge variant={Number(latestBalance) >= 0 ? "success" : "destructive"} className="text-sm">
-          Saldo: Rp {Number(latestBalance).toLocaleString("id-ID")}
-        </Badge>
+        <div className="flex items-center gap-3">
+          <Badge variant={Number(latestBalance) >= 0 ? "success" : "destructive"} className="text-sm">
+            Saldo: Rp {Number(latestBalance).toLocaleString("id-ID")}
+          </Badge>
+          <TriggerDialog trigger={<span className={buttonVariants({})}>Tambah Penyesuaian</span>}>
+            <h2 className="mb-4 text-xl font-semibold">Tambah Penyesuaian Manual</h2>
+            <AdjustmentForm />
+          </TriggerDialog>
+        </div>
       </div>
 
       <h2 className="text-sm font-semibold text-muted-foreground">Riwayat Transaksi</h2>
@@ -72,15 +79,6 @@ export default async function CashLedgerPage() {
           ) : null}
         </TableBody>
       </Table>
-
-      <Card className="max-w-xl">
-        <CardHeader>
-          <CardTitle>Tambah Penyesuaian Manual</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <AdjustmentForm />
-        </CardContent>
-      </Card>
     </div>
   );
 }

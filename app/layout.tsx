@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Lexend, Source_Sans_3 } from "next/font/google";
 import { Toaster } from "sonner";
 import { APP_NAME } from "@/lib/config";
+import { ThemeProvider } from "@/components/shared/theme-provider";
 import "./globals.css";
 
 const heading = Lexend({
@@ -23,10 +24,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="id" className={`h-full antialiased ${heading.variable} ${sans.variable}`}>
+    <html
+      lang="id"
+      className={`h-full antialiased ${heading.variable} ${sans.variable}`}
+      suppressHydrationWarning
+    >
       <body className="min-h-full flex flex-col">
-        {children}
-        <Toaster richColors position="top-center" />
+        <ThemeProvider>
+          {children}
+          <Toaster richColors position="top-center" />
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,4 +1,5 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -23,14 +24,51 @@ const STATUS_LABEL: Record<string, string> = {
 
 export default async function ParentBillingPage() {
   const supabase = await createServerSupabaseClient();
-  const { data: invoices } = await supabase
-    .from("invoices")
-    .select("id, amount, status, due_date, period_start, period_end, children(full_name)")
-    .order("due_date", { ascending: false });
+  const [{ data: invoices }, { data: usageRows }] = await Promise.all([
+    supabase
+      .from("invoices")
+      .select("id, amount, status, due_date, period_start, period_end, children(full_name)")
+      .order("due_date", { ascending: false }),
+    supabase
+      .from("subscription_usage")
+      .select("child_id, child_name, sessions_used, sessions_included, end_date, is_expired"),
+  ]);
+
+  const usage = (usageRows ?? []) as unknown as {
+    child_id: string;
+    child_name: string;
+    sessions_used: number;
+    sessions_included: number;
+    end_date: string | null;
+    is_expired: boolean;
+  }[];
 
   return (
-    <div className="flex flex-col gap-4">
+    <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">Tagihan</h1>
+      {usage.length > 0 ? (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {usage.map((u) => (
+            <Card key={u.child_id}>
+              <CardHeader>
+                <CardTitle className="text-sm font-normal text-muted-foreground">
+                  {u.child_name} — Paket Sesi
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="flex items-center justify-between">
+                <span className="text-lg font-semibold">
+                  {u.sessions_used} / {u.sessions_included} sesi
+                </span>
+                {u.end_date ? (
+                  <Badge variant={u.is_expired ? "destructive" : "secondary"}>
+                    {u.is_expired ? "Kedaluwarsa" : "Berlaku sampai"} {u.end_date}
+                  </Badge>
+                ) : null}
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      ) : null}
       <Table>
         <TableHeader>
           <TableRow>

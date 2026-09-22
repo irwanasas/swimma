@@ -1,7 +1,9 @@
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getLocations } from "@/lib/data/lookups";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ListFilters } from "@/components/shared/list-filters";
 import {
   Table,
   TableBody,
@@ -31,12 +33,21 @@ function calculateAge(dateOfBirth: string): number {
   return age;
 }
 
-export default async function MembersPage() {
-  const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
+export default async function MembersPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string; location?: string }>;
+}) {
+  const { q, status, location } = await searchParams;
+  const [supabase, locations] = await Promise.all([createServerSupabaseClient(), getLocations()]);
+  let query = supabase
     .from("children")
     .select("id, full_name, date_of_birth, is_active, profiles(full_name), locations(name)")
     .order("full_name");
+  if (q) query = query.ilike("full_name", `%${q}%`);
+  if (status) query = query.eq("is_active", status === "active");
+  if (location) query = query.eq("preferred_location_id", location);
+  const { data } = await query;
 
   const children = (data ?? []) as unknown as ChildRow[];
 
@@ -48,6 +59,26 @@ export default async function MembersPage() {
           Tambah Anggota
         </Link>
       </div>
+      <ListFilters
+        fields={[
+          { type: "search", name: "q", placeholder: "Cari nama anak..." },
+          {
+            type: "select",
+            name: "status",
+            placeholder: "Semua Status",
+            options: [
+              { value: "active", label: "Aktif" },
+              { value: "inactive", label: "Nonaktif" },
+            ],
+          },
+          {
+            type: "select",
+            name: "location",
+            placeholder: "Semua Lokasi",
+            options: locations.map((l) => ({ value: l.id, label: l.name })),
+          },
+        ]}
+      />
       <Table>
         <TableHeader>
           <TableRow>

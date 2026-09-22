@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { markInvoicePaidForm, voidInvoiceForm } from "@/lib/actions/billing";
 import { ActionSubmitButton } from "@/components/shared/action-submit-button";
+import { ListFilters } from "@/components/shared/list-filters";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import {
@@ -25,17 +26,40 @@ const STATUS_LABEL: Record<string, string> = {
   void: "Dibatalkan",
 };
 
-export default async function InvoicesPage() {
+export default async function InvoicesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ status?: string; q?: string }>;
+}) {
+  const { status, q } = await searchParams;
   const supabase = await createServerSupabaseClient();
-  const { data: invoices } = await supabase
+  let query = supabase
     .from("invoices")
-    .select("id, amount, status, due_date, period_start, period_end, children(full_name)")
+    .select("id, amount, status, due_date, period_start, period_end, children!inner(full_name)")
     .order("due_date", { ascending: false });
+  if (status) query = query.eq("status", status);
+  if (q) query = query.ilike("children.full_name", `%${q}%`);
+  const { data: invoices } = await query;
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">Tagihan</h1>
       <h2 className="text-sm font-semibold text-muted-foreground">Daftar Tagihan</h2>
+      <ListFilters
+        fields={[
+          { type: "search", name: "q", placeholder: "Cari nama anak..." },
+          {
+            type: "select",
+            name: "status",
+            placeholder: "Semua Status",
+            options: [
+              { value: "outstanding", label: "Belum Bayar" },
+              { value: "paid", label: "Lunas" },
+              { value: "void", label: "Dibatalkan" },
+            ],
+          },
+        ]}
+      />
       <Table>
         <TableHeader>
           <TableRow>

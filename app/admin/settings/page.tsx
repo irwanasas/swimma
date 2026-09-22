@@ -2,6 +2,8 @@ import { getLocations, getClassTypes } from "@/lib/data/lookups";
 import { getCurrentTenant } from "@/lib/data/tenant";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { buttonVariants } from "@/components/ui/button";
+import { TriggerDialog } from "@/components/ui/dialog";
 import { LocationForm } from "@/components/settings/location-form";
 import { ClassTypeForm } from "@/components/settings/class-type-form";
 import { TenantBrandingForm } from "@/components/settings/tenant-branding-form";
@@ -30,8 +32,12 @@ export default async function SettingsPage() {
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Lokasi Kolam</CardTitle>
+            <TriggerDialog trigger={<span className={buttonVariants({ variant: "outline", size: "sm" })}>Tambah</span>}>
+              <h2 className="mb-4 text-xl font-semibold">Tambah Lokasi</h2>
+              <LocationForm />
+            </TriggerDialog>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-wrap gap-2">
@@ -44,12 +50,15 @@ export default async function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Belum ada lokasi.</p>
               ) : null}
             </div>
-            <LocationForm />
           </CardContent>
         </Card>
         <Card>
-          <CardHeader>
+          <CardHeader className="flex flex-row items-center justify-between">
             <CardTitle>Jenis Kelas</CardTitle>
+            <TriggerDialog trigger={<span className={buttonVariants({ variant: "outline", size: "sm" })}>Tambah</span>}>
+              <h2 className="mb-4 text-xl font-semibold">Tambah Jenis Kelas</h2>
+              <ClassTypeForm />
+            </TriggerDialog>
           </CardHeader>
           <CardContent className="flex flex-col gap-4">
             <div className="flex flex-wrap gap-2">
@@ -62,7 +71,6 @@ export default async function SettingsPage() {
                 <p className="text-sm text-muted-foreground">Belum ada jenis kelas.</p>
               ) : null}
             </div>
-            <ClassTypeForm />
           </CardContent>
         </Card>
       </div>

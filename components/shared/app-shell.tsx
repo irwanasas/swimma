@@ -1,5 +1,6 @@
 import { LogoutButton } from "./logout-button";
 import { NavLink } from "./nav-link";
+import { ThemeToggle } from "./theme-toggle";
 
 export interface NavItem {
   href: string;
@@ -30,6 +31,7 @@ export function AppShell({
         </div>
         <div className="flex items-center gap-3">
           <span className="hidden text-sm text-muted-foreground sm:inline">{fullName}</span>
+          <ThemeToggle />
           <LogoutButton />
         </div>
       </header>

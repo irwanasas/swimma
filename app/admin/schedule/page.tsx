@@ -1,6 +1,8 @@
 import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getActiveCoaches, getLocations, getClassTypes } from "@/lib/data/lookups";
 import { buttonVariants } from "@/components/ui/button";
+import { ListFilters } from "@/components/shared/list-filters";
 import {
   Table,
   TableBody,
@@ -21,14 +23,28 @@ interface ClassRow {
   bookings: { count: number }[];
 }
 
-export default async function SchedulePage() {
-  const supabase = await createServerSupabaseClient();
-  const { data } = await supabase
+export default async function SchedulePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ coach?: string; location?: string; classType?: string }>;
+}) {
+  const { coach, location, classType } = await searchParams;
+  const [supabase, coaches, locations, classTypes] = await Promise.all([
+    createServerSupabaseClient(),
+    getActiveCoaches(),
+    getLocations(),
+    getClassTypes(),
+  ]);
+  let query = supabase
     .from("classes")
     .select(
       "id, start_time, end_time, capacity, profiles(full_name), locations(name), class_types(name), bookings(count)"
     )
     .order("start_time");
+  if (coach) query = query.eq("instructor_id", coach);
+  if (location) query = query.eq("location_id", location);
+  if (classType) query = query.eq("class_type_id", classType);
+  const { data } = await query;
 
   const classes = (data ?? []) as unknown as ClassRow[];
 
@@ -40,6 +56,28 @@ export default async function SchedulePage() {
           Tambah Kelas
         </Link>
       </div>
+      <ListFilters
+        fields={[
+          {
+            type: "select",
+            name: "coach",
+            placeholder: "Semua Pelatih",
+            options: coaches.map((c) => ({ value: c.id, label: c.name })),
+          },
+          {
+            type: "select",
+            name: "location",
+            placeholder: "Semua Lokasi",
+            options: locations.map((l) => ({ value: l.id, label: l.name })),
+          },
+          {
+            type: "select",
+            name: "classType",
+            placeholder: "Semua Jenis",
+            options: classTypes.map((c) => ({ value: c.id, label: c.name })),
+          },
+        ]}
+      />
       <Table>
         <TableHeader>
           <TableRow>

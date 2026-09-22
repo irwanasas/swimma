@@ -1,6 +1,8 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { deletePromoForm } from "@/lib/actions/promo";
 import { ActionSubmitButton } from "@/components/shared/action-submit-button";
+import { buttonVariants } from "@/components/ui/button";
+import { TriggerDialog } from "@/components/ui/dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { PromoForm } from "@/components/promo/promo-form";
@@ -16,16 +18,13 @@ export default async function PromoAdminPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Promo</h1>
-
-      <Card className="max-w-xl">
-        <CardHeader>
-          <CardTitle>Tambah Promo Baru</CardTitle>
-        </CardHeader>
-        <CardContent>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Promo</h1>
+        <TriggerDialog trigger={<span className={buttonVariants({})}>Tambah Promo</span>}>
+          <h2 className="mb-4 text-xl font-semibold">Tambah Promo Baru</h2>
           <PromoForm />
-        </CardContent>
-      </Card>
+        </TriggerDialog>
+      </div>
 
       <h2 className="text-sm font-semibold text-muted-foreground">Semua Promo</h2>
       <div className="grid gap-4 sm:grid-cols-2">

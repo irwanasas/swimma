@@ -38,12 +38,28 @@ export async function getActiveChildren(): Promise<Lookup[]> {
   return (data ?? []).map((c) => ({ id: c.id, name: c.full_name }));
 }
 
-export async function getActivePackages(): Promise<Lookup[]> {
+export interface PackageOption extends Lookup {
+  price: number;
+  pricingMode: "cycle" | "session_pack";
+  billingCycle: string | null;
+  sessionsIncluded: number | null;
+  validityWeeks: number | null;
+}
+
+export async function getActivePackages(): Promise<PackageOption[]> {
   const supabase = await createServerSupabaseClient();
   const { data } = await supabase
     .from("membership_packages")
-    .select("id, name")
+    .select("id, name, price, pricing_mode, billing_cycle, sessions_included, validity_weeks")
     .eq("is_active", true)
     .order("name");
-  return (data ?? []).map((p) => ({ id: p.id, name: p.name }));
+  return (data ?? []).map((p) => ({
+    id: p.id,
+    name: p.name,
+    price: Number(p.price),
+    pricingMode: p.pricing_mode,
+    billingCycle: p.billing_cycle,
+    sessionsIncluded: p.sessions_included,
+    validityWeeks: p.validity_weeks,
+  }));
 }

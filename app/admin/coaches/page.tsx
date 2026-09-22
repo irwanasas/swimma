@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { buttonVariants } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import { ListFilters } from "@/components/shared/list-filters";
 import {
   Table,
   TableBody,
@@ -11,13 +12,21 @@ import {
   TableRow,
 } from "@/components/ui/table";
 
-export default async function CoachesPage() {
+export default async function CoachesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; status?: string }>;
+}) {
+  const { q, status } = await searchParams;
   const supabase = await createServerSupabaseClient();
-  const { data: coaches } = await supabase
+  let query = supabase
     .from("profiles")
     .select("id, full_name, email, phone, is_active")
     .eq("role", "coach")
     .order("full_name");
+  if (q) query = query.ilike("full_name", `%${q}%`);
+  if (status) query = query.eq("is_active", status === "active");
+  const { data: coaches } = await query;
 
   return (
     <div className="flex flex-col gap-4">
@@ -27,6 +36,20 @@ export default async function CoachesPage() {
           Tambah Pelatih
         </Link>
       </div>
+      <ListFilters
+        fields={[
+          { type: "search", name: "q", placeholder: "Cari nama pelatih..." },
+          {
+            type: "select",
+            name: "status",
+            placeholder: "Semua Status",
+            options: [
+              { value: "active", label: "Aktif" },
+              { value: "inactive", label: "Nonaktif" },
+            ],
+          },
+        ]}
+      />
       <Table>
         <TableHeader>
           <TableRow>

@@ -1,5 +1,6 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { TriggerDialog } from "@/components/ui/dialog";
 import {
   Table,
   TableBody,
@@ -25,7 +26,13 @@ export default async function PackagesPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Paket Keanggotaan</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Paket Keanggotaan</h1>
+        <TriggerDialog trigger={<span className={buttonVariants({})}>Tambah Paket</span>}>
+          <h2 className="mb-4 text-xl font-semibold">Tambah Paket Baru</h2>
+          <PackageForm />
+        </TriggerDialog>
+      </div>
       <h2 className="text-sm font-semibold text-muted-foreground">Daftar Paket</h2>
       <Table>
         <TableHeader>
@@ -52,14 +59,6 @@ export default async function PackagesPage() {
           ) : null}
         </TableBody>
       </Table>
-      <Card className="max-w-md">
-        <CardHeader>
-          <CardTitle>Tambah Paket Baru</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PackageForm />
-        </CardContent>
-      </Card>
     </div>
   );
 }

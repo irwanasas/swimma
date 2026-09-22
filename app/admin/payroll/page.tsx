@@ -1,6 +1,7 @@
 import { createServerSupabaseClient } from "@/lib/supabase/server";
 import { getActiveCoaches } from "@/lib/data/lookups";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { buttonVariants } from "@/components/ui/button";
+import { TriggerDialog } from "@/components/ui/dialog";
 import { Badge } from "@/components/ui/badge";
 import {
   Table,
@@ -24,7 +25,13 @@ export default async function PayrollPage() {
 
   return (
     <div className="flex flex-col gap-6">
-      <h1 className="text-2xl font-semibold">Gaji Pelatih</h1>
+      <div className="flex items-center justify-between">
+        <h1 className="text-2xl font-semibold">Gaji Pelatih</h1>
+        <TriggerDialog trigger={<span className={buttonVariants({})}>Buat Gaji Baru</span>}>
+          <h2 className="mb-4 text-xl font-semibold">Buat Gaji Baru</h2>
+          <PayrollRunForm coaches={coaches} />
+        </TriggerDialog>
+      </div>
 
       <h2 className="text-sm font-semibold text-muted-foreground">Riwayat Gaji</h2>
       <Table>
@@ -79,15 +86,6 @@ export default async function PayrollPage() {
           ) : null}
         </TableBody>
       </Table>
-
-      <Card className="max-w-2xl">
-        <CardHeader>
-          <CardTitle>Buat Gaji Baru</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <PayrollRunForm coaches={coaches} />
-        </CardContent>
-      </Card>
     </div>
   );
 }
