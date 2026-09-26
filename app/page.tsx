@@ -115,9 +115,14 @@ export default async function Home() {
               </a>
             ))}
           </nav>
-          <Link href="/login" className={buttonVariants({ variant: "outline" })}>
-            Masuk
-          </Link>
+          <div className="flex items-center gap-3">
+            <Link href="/login" className={buttonVariants({ variant: "outline" })}>
+              Masuk
+            </Link>
+            <Link href="/daftar" className={buttonVariants({})}>
+              Daftarkan Klub
+            </Link>
+          </div>
         </div>
       </header>
 
@@ -132,12 +137,12 @@ export default async function Home() {
               atau puluhan klub sekaligus.
             </p>
             <div className="mt-8 flex flex-wrap items-center gap-4 motion-safe:animate-fade-up motion-safe:[animation-delay:150ms]">
-              <Link href="/login" className={buttonVariants({ size: "lg" })}>
+              <Link href="/daftar" className={buttonVariants({ size: "lg" })}>
+                Daftarkan Klub Anda
+              </Link>
+              <Link href="/login" className={buttonVariants({ variant: "ghost", size: "lg" })}>
                 Masuk ke Akun Klub
               </Link>
-              <a href="#cara-kerja" className={buttonVariants({ variant: "ghost", size: "lg" })}>
-                Lihat cara kerjanya
-              </a>
             </div>
           </div>
 
@@ -274,12 +279,20 @@ export default async function Home() {
             <h2 className="max-w-lg font-heading text-3xl font-semibold tracking-tight sm:text-4xl">
               Siap kelola klub renang Anda dengan lebih rapi?
             </h2>
-            <Link
-              href="/login"
-              className={buttonVariants({ variant: "secondary", size: "lg" })}
-            >
-              Masuk ke Akun Klub
-            </Link>
+            <div className="flex flex-wrap items-center gap-4">
+              <Link
+                href="/daftar"
+                className={buttonVariants({ variant: "secondary", size: "lg" })}
+              >
+                Daftarkan Klub Anda
+              </Link>
+              <Link
+                href="/login"
+                className={buttonVariants({ variant: "ghost", size: "lg", className: "text-primary-foreground hover:text-primary-foreground" })}
+              >
+                Masuk ke Akun Klub
+              </Link>
+            </div>
           </div>
         </section>
       </main>
@@ -297,6 +310,9 @@ export default async function Home() {
             ))}
             <Link href="/login" className="transition-colors hover:text-foreground">
               Masuk
+            </Link>
+            <Link href="/daftar" className="transition-colors hover:text-foreground">
+              Daftarkan Klub
             </Link>
           </div>
         </div>

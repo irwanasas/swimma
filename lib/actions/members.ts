@@ -142,6 +142,9 @@ export async function createChild(
   });
 
   if (childError) {
+    if (childError.message.includes("Batas jumlah anggota")) {
+      return { ok: false, error: childError.message };
+    }
     return { ok: false, error: "Gagal menyimpan data anak" };
   }
 

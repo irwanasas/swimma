@@ -19,3 +19,8 @@ export const passwordSchema = z
 export const changePasswordSchema = z.object({
   newPassword: passwordSchema,
 });
+
+export const superadminLoginSchema = z.object({
+  email: z.string().email("Email tidak valid"),
+  password: z.string().min(1, "Kata sandi wajib diisi"),
+});

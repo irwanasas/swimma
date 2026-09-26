@@ -97,11 +97,51 @@ which generates invoices for every active tenant in one run.
 ## Onboarding a new club
 
 Because isolation is enforced at the database level (RLS + `tenant_id`),
-new clubs are onboarded onto the **same** deployment and Supabase project
-by running `npm run seed:admin` again with a new `SEED_TENANT_SLUG`/
-`SEED_TENANT_NAME` — no new Supabase project or Vercel deployment needed.
-The new admin then sets their own club name/logo/color from Admin ->
+new clubs are onboarded onto the **same** deployment and Supabase project —
+no new Supabase project or Vercel deployment needed. Two ways in:
+
+- **Self-service** (`/daftar`): a club owner fills in club name, club code,
+  their own name/email/password, and is logged straight into their new
+  `/admin` — no admin-side setup needed. The new tenant starts on the
+  **Trial** plan (14 days, capped at 20 active children, enforced by a DB
+  trigger on `children` inserts, not just in the UI).
+- **Manual** (`npm run seed:admin` with a new `SEED_TENANT_SLUG`/
+  `SEED_TENANT_NAME`) — still available for onboarding a club yourself
+  without going through the public form.
+
+Either way, the new admin sets their own club name/logo/color from Admin ->
 Pengaturan.
+
+## Platform billing (superadmin)
+
+Swimma-the-product bills clubs, separately from how a club bills its own
+parents. This is a distinct actor from `admin`/`coach`/`parent` — a
+superadmin is **not** tied to any tenant and manages every club's plan and
+payment status from its own portal, `/superadmin`.
+
+- Bootstrap the first superadmin (chicken-and-egg — there's no UI for this,
+  by design):
+  ```bash
+  SEED_SUPERADMIN_EMAIL=you@example.com SEED_SUPERADMIN_PASSWORD=ChangeMe123 \
+  npm run seed:superadmin
+  ```
+- Log in at `/superadmin/login` (separate session cookie and JWT shape from
+  club logins — a superadmin session carries no `tenant_id`/`app_role` and
+  is never used as a Supabase bearer token; every superadmin query goes
+  through the service-role client, not RLS).
+- `/superadmin` lists every club with its plan, status (trial / active /
+  suspended / cancelled), member count vs. plan limit, and trial end date.
+  Changing a club to **suspended** also flips `tenants.is_active = false`,
+  which immediately blocks login for every user in that club (the same
+  flag already checked by `/api/auth/login`) — this is the actual
+  enforcement mechanism, not just a label.
+- Plans live in `platform_plans` (seeded with "Trial" and "Berbayar") —
+  edit prices/limits there as the pricing model firms up; no code changes
+  needed to add a new plan tier.
+- There's no payment gateway wired up yet — moving a club from trial to
+  active is a manual step a superadmin takes after being paid outside the
+  app (bank transfer, invoice, etc.), the same "mark paid manually" pattern
+  the app already uses for a club's own parent invoices.
 
 ## Notes / out of scope
 
@@ -115,6 +155,20 @@ Pengaturan.
   parents register themselves would undermine the duplicate-child check.
 
 ## Changelog
+
+### 2026-09-26
+
+- Platform-to-club billing mechanism: new `superadmins`, `platform_plans`,
+  `platform_subscriptions` tables (migration
+  `20250101000010_platform_billing.sql`), a separate `/superadmin` portal
+  (own login/session, service-role only, no tenant scoping) to set each
+  club's plan/status, and a DB-enforced trial member limit on `children`
+  inserts.
+- Self-service club onboarding at `/daftar` — a club owner signs up
+  directly (no admin-side setup), lands on the Trial plan, and is logged
+  straight into `/admin`. Landing page CTAs updated ("Daftarkan Klub Anda").
+- `scripts/seed-superadmin.ts` (`npm run seed:superadmin`) to bootstrap the
+  first superadmin account.
 
 ### 2026-09-22
 
