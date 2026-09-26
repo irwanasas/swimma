@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { getDashboardData } from "@/lib/data/dashboard";
+import { getOwnSubscription } from "@/lib/data/platform-plan";
+import { PlanUpgradeBanner } from "@/components/admin/plan-upgrade-banner";
 import { StatCard } from "@/components/reports/stat-card";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -39,11 +41,13 @@ const QUICK_LINKS = [
 ];
 
 export default async function AdminDashboardPage() {
-  const data = await getDashboardData();
+  const [data, subscription] = await Promise.all([getDashboardData(), getOwnSubscription()]);
 
   return (
     <div className="flex flex-col gap-6">
       <h1 className="text-2xl font-semibold">Dasbor Admin</h1>
+
+      <PlanUpgradeBanner subscription={subscription} activeMemberCount={data.activeChildren} />
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard title="Total Pendapatan" value={formatRupiah(data.totalRevenue)} />

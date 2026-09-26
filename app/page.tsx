@@ -8,6 +8,7 @@ import {
   BarChart3,
   Building2,
   ShieldCheck,
+  Check,
 } from "lucide-react";
 import { getSession } from "@/lib/auth/session";
 import { roleHome } from "@/lib/auth/roles";
@@ -27,7 +28,47 @@ const NAV_LINKS = [
   { href: "#fitur", label: "Fitur" },
   { href: "#cara-kerja", label: "Cara Kerja" },
   { href: "#multi-klub", label: "Multi Klub" },
+  { href: "#harga", label: "Harga" },
   { href: "#dasbor", label: "Dasbor" },
+];
+
+const PRICING_TIERS = [
+  {
+    name: "Trial",
+    price: 0,
+    period: "14 hari",
+    memberLimit: "20 anggota",
+    description: "Coba semua fitur inti sebelum berlangganan.",
+    features: ["1 lokasi kolam", "Semua fitur inti", "Tanpa kartu kredit"],
+    highlighted: false,
+  },
+  {
+    name: "Starter",
+    price: 300000,
+    period: "bulan",
+    memberLimit: "75 anggota",
+    description: "Untuk klub renang satu lokasi.",
+    features: ["1 lokasi kolam", "Semua fitur inti", "Buku kas & gaji pelatih"],
+    highlighted: false,
+  },
+  {
+    name: "Growth",
+    price: 750000,
+    period: "bulan",
+    memberLimit: "250 anggota",
+    description: "Untuk klub yang mulai berkembang ke beberapa cabang.",
+    features: ["Hingga 3 lokasi kolam", "Semua fitur inti", "Buku kas & gaji pelatih"],
+    highlighted: true,
+  },
+  {
+    name: "Pro",
+    price: 1500000,
+    period: "bulan",
+    memberLimit: "Anggota tanpa batas",
+    description: "Untuk klub besar atau jaringan multi-cabang.",
+    features: ["Lokasi kolam tanpa batas", "Semua fitur inti", "Buku kas & gaji pelatih"],
+    highlighted: false,
+  },
 ];
 
 const FEATURES = [
@@ -225,6 +266,61 @@ export default async function Home() {
                 </div>
               ))}
             </div>
+          </div>
+        </section>
+
+        <section id="harga" className="mx-auto w-full max-w-6xl px-4 py-16 sm:px-6 sm:py-24">
+          <h2 className="max-w-lg font-heading text-3xl font-semibold tracking-tight text-foreground sm:text-4xl">
+            Harga yang jelas, tumbuh bersama klub Anda.
+          </h2>
+          <p className="mt-4 max-w-xl text-muted-foreground">
+            Semua paket berbayar bisa dicoba lewat trial gratis dulu — upgrade kapan saja setelahnya.
+          </p>
+          <div className="mt-10 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            {PRICING_TIERS.map((tier) => (
+              <div
+                key={tier.name}
+                className={`flex flex-col rounded-lg border p-6 ${
+                  tier.highlighted ? "border-primary bg-secondary" : "border-border bg-card"
+                }`}
+              >
+                {tier.highlighted ? (
+                  <Badge className="mb-3 w-fit" variant="default">
+                    Paling Populer
+                  </Badge>
+                ) : null}
+                <h3 className="font-heading text-lg font-semibold text-foreground">{tier.name}</h3>
+                <p className="mt-1 text-sm text-muted-foreground">{tier.description}</p>
+                <div className="mt-4">
+                  <span className="font-heading text-2xl font-semibold text-foreground">
+                    {tier.price === 0 ? "Gratis" : `Rp ${tier.price.toLocaleString("id-ID")}`}
+                  </span>
+                  {tier.price > 0 ? (
+                    <span className="text-sm text-muted-foreground">/{tier.period}</span>
+                  ) : (
+                    <span className="text-sm text-muted-foreground"> · {tier.period}</span>
+                  )}
+                </div>
+                <p className="mt-1 text-sm font-medium text-primary">{tier.memberLimit}</p>
+                <ul className="mt-4 flex flex-col gap-2 text-sm text-muted-foreground">
+                  {tier.features.map((f) => (
+                    <li key={f} className="flex items-start gap-2">
+                      <Check className="mt-0.5 size-4 shrink-0 text-primary" aria-hidden />
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+                <Link
+                  href="/daftar"
+                  className={buttonVariants({
+                    variant: tier.highlighted ? "default" : "outline",
+                    className: "mt-6",
+                  })}
+                >
+                  Mulai Trial Gratis
+                </Link>
+              </div>
+            ))}
           </div>
         </section>
 

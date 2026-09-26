@@ -143,6 +143,28 @@ payment status from its own portal, `/superadmin`.
   app (bank transfer, invoice, etc.), the same "mark paid manually" pattern
   the app already uses for a club's own parent invoices.
 
+### Pricing model
+
+Prices in `platform_plans` (Starter/Growth/Pro) are cost-derived, not
+arbitrary, so the platform stays solvent even with generous trials:
+
+- **Fixed monthly infra floor** (one deployment serves every tenant, so
+  this cost doesn't scale per club): Vercel Pro ≈ $24/mo, Supabase Pro ≈
+  $25/mo, plus a usage/overage buffer ≈ $20–30/mo → **≈ Rp 1,300,000/bulan**
+  at ≈ Rp 17,900/USD (verify current pricing/FX before relying on this —
+  it was checked once, not live-monitored).
+- **Marginal cost per additional tenant is ≈ Rp 0** — a trial club or a
+  discounted club doesn't add hosting spend, it only forgoes revenue it
+  wouldn't otherwise have paid. The real risk isn't "one discount," it's
+  not having enough paying clubs to clear the fixed floor above.
+- **Break-even**: roughly 2 Growth-tier clubs, or 1 Pro-tier club, or ~5
+  Starter-tier clubs, covers the entire infra floor. Every paying club
+  beyond that is >90% margin (support time aside), since nothing scales
+  per-tenant until real usage growth pushes Supabase/Vercel into a higher
+  tier.
+- Starter is intentionally priced as an acquisition tier (small clubs,
+  thin margin alone); Growth/Pro are what carry the platform's margin.
+
 ## Notes / out of scope
 
 - Swim competition (lomba renang) tracking is intentionally not built, but
@@ -155,6 +177,19 @@ payment status from its own portal, `/superadmin`.
   parents register themselves would undermine the duplicate-child check.
 
 ## Changelog
+
+### 2026-09-26 (2)
+
+- Real cost-derived pricing tiers (Starter/Growth/Pro) replacing the
+  placeholder flat plan, seeded via `20250101000011_pricing_tiers.sql`; see
+  "Pricing model" above for the break-even math.
+- Narrow RLS read policies so a tenant admin can see `platform_plans` and
+  their **own** `platform_subscriptions` row (still no update access —
+  upgrades stay superadmin-only).
+- Landing page: new "Harga" pricing section (4 tiers, all CTAs route to the
+  real `/daftar` trial signup — no fake checkout).
+- Admin dashboard: a plan/upgrade banner showing trial countdown, member
+  usage vs. limit, and the paid tiers as an upgrade offer.
 
 ### 2026-09-26
 
